@@ -1,7 +1,7 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "../../prisma/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // Create a single Prisma instance
 const globalForPrisma = globalThis as unknown as {
