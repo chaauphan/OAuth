@@ -15,7 +15,7 @@ export default function Home() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-8">Hello</h1>
+          <h1 className="text-4xl font-bold mb-8">Bello</h1>
           <p>Loading...</p>
         </div>
       </main>
@@ -25,7 +25,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-8">Hello</h1>
+        <h1 className="text-4xl font-bold mb-8">Bello</h1>
         {status === "loading" ? (
           <p>Loading...</p>
         ) : session ? (
