@@ -53,7 +53,7 @@ export default function Home() {
             ) : (
               <>
                 <h2 className="text-2xl font-bold mb-4 text-black">Sign In Required</h2>
-                <p className="mb-6 text-black">Please sign in to join Poobie's site.</p>
+                <p className="mb-6 text-black">Please sign in to join Poobie&apos;s site.</p>
                 <button
                   onClick={() => signIn('google')}
                   className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
