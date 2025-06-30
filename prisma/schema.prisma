@@ -20,4 +20,37 @@ model User {
   avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Store games as JSON for now
+  games Json? @default("[]")
+  
+  // Relations
+  userGames UserGame[]
+}
+
+model Game {
+  id          Int      @id @default(autoincrement())
+  mobyGamesId Int      @unique // MobyGames game_id
+  title       String
+  platform    String
+  releaseDate String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userGames UserGame[]
+}
+
+model UserGame {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  gameId    Int
+  addedAt   DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, gameId]) // Prevent duplicate entries
 } 
