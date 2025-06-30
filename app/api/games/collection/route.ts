@@ -3,7 +3,22 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { prisma } from '../../../lib/prisma';
 
-export async function GET(request: NextRequest) {
+interface UserGameWithGame {
+  id: number;
+  userId: string;
+  gameId: number;
+  addedAt: Date;
+  game: {
+    id: number;
+    mobyGamesId: number;
+    title: string;
+    platform: string;
+    releaseDate: string | null;
+    imageUrl: string | null;
+  };
+}
+
+export async function GET() {
   try {
     // Get the current user session
     const session = await getServerSession(authOptions);
@@ -33,7 +48,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform the data to match the frontend interface
-    const games = userGames.map((userGame: any) => ({
+    const games = userGames.map((userGame: UserGameWithGame) => ({
       id: userGame.game.id,
       mobyGamesId: userGame.game.mobyGamesId,
       title: userGame.game.title,

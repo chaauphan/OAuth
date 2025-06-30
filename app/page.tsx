@@ -114,10 +114,6 @@ export default function Home() {
     }
   };
 
-  const handleSearch = () => {
-    searchGames(searchQuery);
-  };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       searchGames(searchQuery);

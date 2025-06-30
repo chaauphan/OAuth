@@ -3,6 +3,22 @@ import { NextRequest, NextResponse } from 'next/server';
 const MOBYGAMES_API_KEY = process.env.MOBYGAMES_API_KEY;
 const MOBYGAMES_BASE_URL = 'https://api.mobygames.com/v1';
 
+interface MobyGamesPlatform {
+  platform_name: string;
+  first_release_date: string;
+}
+
+interface MobyGamesCover {
+  image: string;
+}
+
+interface MobyGamesGame {
+  game_id: number;
+  title: string;
+  platforms?: MobyGamesPlatform[];
+  sample_cover?: MobyGamesCover;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
@@ -30,7 +46,7 @@ export async function GET(request: NextRequest) {
     console.log('MobyGames API response structure:', JSON.stringify(data.games?.[0], null, 2));
     
     // Transform the games data to include platform and image info
-    const transformedGames = (data.games || []).map((game: any) => {
+    const transformedGames = (data.games || []).map((game: MobyGamesGame) => {
       // Get the first platform and its release date
       const firstPlatform = game.platforms?.[0];
       const platform = firstPlatform ? firstPlatform.platform_name : 'Unknown Platform';
