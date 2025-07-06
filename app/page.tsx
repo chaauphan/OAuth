@@ -10,6 +10,7 @@ interface Game {
   platform: string;
   release_date?: string;
   image_url?: string;
+  playedAt?: string;
 }
 
 export default function Home() {
@@ -21,6 +22,9 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [addingGame, setAddingGame] = useState<number | null>(null);
+  const [playedDate, setPlayedDate] = useState("");
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -75,7 +79,12 @@ export default function Home() {
     }
   };
 
-  const addGameToCollection = async (game: Game) => {
+  const handleAddGameClick = (game: Game) => {
+    setSelectedGame(game);
+    setShowDateModal(true);
+  };
+
+  const addGameToCollection = async (game: Game, datePlayed: string) => {
     setAddingGame(game.game_id);
     
     const gameData = {
@@ -83,7 +92,8 @@ export default function Home() {
       title: game.title,
       platform: game.platform,
       releaseDate: game.release_date,
-      imageUrl: game.image_url
+      imageUrl: game.image_url,
+      playedAt: datePlayed || null
     };
     
     console.log('Sending game data:', gameData);
@@ -102,6 +112,10 @@ export default function Home() {
       if (response.ok) {
         // Show success feedback (you can add a toast notification here)
         console.log('Game added successfully:', data.message);
+        // Close the date modal and reset
+        setShowDateModal(false);
+        setSelectedGame(null);
+        setPlayedDate("");
         // Optionally remove the game from search results or mark it as added
       } else {
         console.error('Failed to add game:', data.error);
@@ -132,31 +146,31 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-green">
+    <main className="min-h-screen flex items-center justify-center bg-green relative">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-8">Bello</h1>
-        {session && (
-          <div className="mb-6">
-            <p className="text-lg mb-4">
-              You are signed in as: <strong>{session.user?.name || session.user?.email}</strong>
-            </p>
-            <Link 
-              href="/collection"
-              className="absolute bg-blue-500 text-white px-10 py-2 rounded-lg hover:bg-blue-600 transition-colors mb-4 top-5 left-5"
-            >
-              Games Played
-            </Link>
-          </div>
-        )}
         <button
           onClick={() => setShowModal(true)}
-          className="bg-green-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-600 transition-colors"
+          className="cursor-pointer bg-green-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-600 transition-colors"
         >
           Get started
         </button>
       </div>
+      
+      {/* MobyGames Credit */}
+      <div className="fixed bottom-4 left-4 text-xs text-gray-600 dark:text-gray-400">
+        Game data provided by{' '}
+        <a 
+          href="https://www.mobygames.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          MobyGames
+        </a>
+      </div>
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
           {status === "loading" ? (
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
               <p>Loading...</p>
@@ -167,7 +181,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-black dark:text-white">Log a game...</h2>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-500 dark:text-white hover:text-gray-700 text-xl"
+                  className="cursor-pointer text-gray-500 dark:text-white hover:text-gray-700 text-xl"
                 >
                   ×
                 </button>
@@ -190,6 +204,8 @@ export default function Home() {
                     )}
                   </div>
                 </div>
+                
+
                 
                 <div className="flex-1 overflow-y-auto">
                   {searchError && (
@@ -229,7 +245,7 @@ export default function Home() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              addGameToCollection(game);
+                              handleAddGameClick(game);
                             }}
                             disabled={addingGame === game.game_id}
                             className="flex items-center justify-center w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors duration-200 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -283,6 +299,84 @@ export default function Home() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Date Selection Modal */}
+      {showDateModal && selectedGame && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-black dark:text-white">
+                Date played?
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDateModal(false);
+                  setSelectedGame(null);
+                  setPlayedDate("");
+                }}
+                className="cursor-pointer text-gray-500 dark:text-white hover:text-gray-700 text-xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
+                {selectedGame.image_url && (
+                  <img
+                    src={selectedGame.image_url}
+                    alt={selectedGame.title}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                )}
+                <div className="flex-1">
+                  <h4 className="font-semibold text-black dark:text-white">{selectedGame.title}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedGame.platform} {selectedGame.release_date && `• ${selectedGame.release_date}`}
+                  </p>
+                </div>
+              </div>
+              
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Date played (optional)
+              </label>
+              <input
+                type="date"
+                value={playedDate}
+                onChange={(e) => setPlayedDate(e.target.value)}
+                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-black dark:text-white"
+              />
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowDateModal(false);
+                  setSelectedGame(null);
+                  setPlayedDate("");
+                }}
+                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => addGameToCollection(selectedGame, playedDate)}
+                disabled={addingGame === selectedGame.game_id}
+                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addingGame === selectedGame.game_id ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Adding...
+                  </div>
+                ) : (
+                  'Add to Collection'
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

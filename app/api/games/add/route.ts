@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Received game data:', body);
     
-    const { gameId, title, platform, releaseDate, imageUrl } = body;
+    const { gameId, title, platform, releaseDate, imageUrl, playedAt } = body;
 
     if (!gameId || !title) {
       console.log('Missing data - gameId:', gameId, 'title:', title);
@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
     const userGame = await prisma.userGame.create({
       data: {
         userId: user.id,
-        gameId: game.id
+        gameId: game.id,
+        playedAt: playedAt ? new Date(playedAt) : null
       },
       include: {
         game: true
@@ -89,7 +90,8 @@ export async function POST(request: NextRequest) {
       title,
       platform: gamePlatform,
       releaseDate,
-      imageUrl
+      imageUrl,
+      playedAt
     });
 
     return NextResponse.json({
@@ -99,11 +101,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error adding game to collection:', error);
-    console.error('Error details:', {
-      message: (error as Error).message,
-      stack: (error as Error).stack,
-      name: (error as Error).name
-    });
     return NextResponse.json(
       { error: 'Failed to add game to collection' },
       { status: 500 }

@@ -16,7 +16,11 @@ CREATE TABLE IF NOT EXISTS "UserGame" (
   "userId" TEXT NOT NULL,
   "gameId" INTEGER NOT NULL,
   "addedAt" TIMESTAMP DEFAULT NOW(),
+  "playedAt" TIMESTAMP,
   CONSTRAINT fk_user FOREIGN KEY("userId") REFERENCES "User"(id) ON DELETE CASCADE,
   CONSTRAINT fk_game FOREIGN KEY("gameId") REFERENCES "Game"(id) ON DELETE CASCADE,
   CONSTRAINT unique_user_game UNIQUE("userId", "gameId")
-); 
+);
+
+-- Add playedAt column to existing UserGame table if it doesn't exist
+ALTER TABLE "UserGame" ADD COLUMN IF NOT EXISTS "playedAt" TIMESTAMP; 

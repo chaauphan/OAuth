@@ -8,6 +8,7 @@ interface UserGameWithGame {
   userId: string;
   gameId: number;
   addedAt: Date;
+  playedAt: Date | null;
   game: {
     id: number;
     mobyGamesId: number;
@@ -55,7 +56,8 @@ export async function GET() {
       platform: userGame.game.platform,
       releaseDate: userGame.game.releaseDate,
       imageUrl: userGame.game.imageUrl,
-      addedAt: userGame.addedAt.toISOString()
+      addedAt: userGame.addedAt.toISOString(),
+      playedAt: userGame.playedAt?.toISOString() || null
     }));
 
     console.log('Successfully fetched collection for user:', session.user.email, 'Games found:', games.length);
@@ -68,7 +70,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching user collection:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch collection' },
+      { error: 'Uh oh! Failed to fetch collection. Try again in a few minutes or refresh the page.' },
       { status: 500 }
     );
   }

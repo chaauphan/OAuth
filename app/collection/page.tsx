@@ -12,6 +12,7 @@ interface Game {
   releaseDate?: string;
   imageUrl?: string;
   addedAt: string;
+  playedAt?: string;
 }
 
 export default function CollectionPage() {
@@ -60,7 +61,7 @@ export default function CollectionPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
-          <p className="mb-6">Please sign in to view your games.</p>
+          <p className="mb-6">Please sign in to view.</p>
           <Link 
             href="/"
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
@@ -88,7 +89,7 @@ export default function CollectionPage() {
             </div>
             <Link 
               href="/"
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+              className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded mb-4 top-10 left-10"
             >
               Log More Games
             </Link>
@@ -107,40 +108,55 @@ export default function CollectionPage() {
         {error && (
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{error}</p>
-            <button 
-              onClick={fetchUserGames}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Try Again
-            </button>
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/reallySadCat.gif" 
+                alt="Sad cat" 
+                className="w-32 h-32 rounded-lg"
+              />
+            </div>
+            <div className="space-x-4">
+              <button 
+                onClick={fetchUserGames}
+                className="cursor-pointer bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded mb-4 top-10 left-10"
+              >
+                Try Again
+              </button>
+              <button 
+                onClick={() => window.location.reload()}
+                className="cursor-pointer bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded mb-4 top-10 left-10 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Games Grid */}
+        {/* Games Grid - Compact Cards */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {games.map((game) => (
               <div 
                 key={game.id}
-                className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-105"
               >
                 {game.imageUrl && (
                   <img
                     src={game.imageUrl}
                     alt={game.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-32 object-cover"
                   />
                 )}
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+                <div className="p-3">
+                  <h3 className="font-medium text-sm text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {game.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                     {game.platform}
                   </p>
-                  {game.releaseDate && (
-                    <p className="text-sm text-gray-500 dark:text-gray-500 mb-3">
-                      Released: {new Date(game.releaseDate).toLocaleDateString()}
+                  {game.playedAt && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
+                      Played: {new Date(game.playedAt).toLocaleDateString()}
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500">

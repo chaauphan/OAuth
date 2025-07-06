@@ -47,6 +47,7 @@ model UserGame {
   userId    String
   gameId    Int
   addedAt   DateTime @default(now())
+  playedAt  DateTime? // When the game was actually played
   
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
