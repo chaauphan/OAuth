@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Game {
   id: number;
@@ -109,9 +110,11 @@ export default function CollectionPage() {
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{error}</p>
             <div className="flex justify-center mb-6">
-              <img 
+              <Image 
                 src="/reallySadCat.gif" 
                 alt="Sad cat" 
+                width={128}
+                height={128}
                 className="w-32 h-32 rounded-lg"
               />
             </div>
@@ -141,9 +144,11 @@ export default function CollectionPage() {
                 className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-105"
               >
                 {game.imageUrl && (
-                  <img
+                  <Image
                     src={game.imageUrl}
                     alt={game.title}
+                    width={200}
+                    height={128}
                     className="w-full h-32 object-cover"
                   />
                 )}

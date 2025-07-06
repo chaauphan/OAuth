@@ -2,7 +2,7 @@
 
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import Image from "next/image";
 
 interface Game {
   game_id: number;
@@ -158,7 +158,7 @@ export default function Home() {
       </div>
       
       {/* MobyGames Credit */}
-      <div className="fixed bottom-4 left-4 text-xs text-gray-600 dark:text-gray-400">
+      <div className="absolute bottom-4 left-4 text-xs text-gray-600 dark:text-gray-400">
         Game data provided by{' '}
         <a 
           href="https://www.mobygames.com" 
@@ -230,9 +230,11 @@ export default function Home() {
                           className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         >
                           {game.image_url && (
-                            <img
+                            <Image
                               src={game.image_url}
                               alt={game.title}
+                              width={64}
+                              height={64}
                               className="w-16 h-16 object-cover rounded"
                             />
                           )}
@@ -325,9 +327,11 @@ export default function Home() {
             <div className="mb-6">
               <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
                 {selectedGame.image_url && (
-                  <img
+                  <Image
                     src={selectedGame.image_url}
                     alt={selectedGame.title}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover rounded"
                   />
                 )}
