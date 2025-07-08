@@ -1,9 +1,12 @@
 'use client';
 
+
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { sortGamesByDatePlayed, sortGamesByTitle } from "../../lib/sort";
 
 interface Game {
   id: number;
@@ -21,6 +24,8 @@ export default function CollectionPage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortTitle, setSortTitle] = useState(false);
+  const [sortDate, setSortDate] = useState(false);
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -28,14 +33,35 @@ export default function CollectionPage() {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (sortTitle) {
+      fetchUserGames();
+    }
+  }, [sortTitle]);
+
+  useEffect(() => {
+    if (sortDate) {
+      fetchUserGames();
+    }
+  }, [sortDate]);
+
   const fetchUserGames = async () => {
     try {
       const response = await fetch('/api/games/collection');
       const data = await response.json();
 
-      if (response.ok) {
+      if (response.ok && !sortTitle && !sortDate) {
         setGames(data.games || []);
-      } else {
+      } 
+      else if (response.ok && sortTitle) {
+        const sortedGames = sortGamesByTitle(data.games || []);
+        setGames(sortedGames);
+      }
+      else if (response.ok && sortDate) {
+        const sortedGames = sortGamesByDatePlayed(data.games || []);
+        setGames(sortedGames);
+      }
+      else {
         setError(data.error || 'Failed to load collection');
       }
     } catch (error) {
@@ -90,10 +116,51 @@ export default function CollectionPage() {
             </div>
             <Link 
               href="/"
-              className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded mb-4 top-10 left-10"
+              className="absolute bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded mb-4 top-35 left-40"
             >
               Log More Games
             </Link>
+
+            <Menu as="div" className="relative inline-block text-left">
+              <div>
+              <MenuButton className="inline-flex bg-white w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset">
+                Sort by:
+              </MenuButton>
+              </div>
+
+              <MenuItems
+                transition
+                className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+              >
+              <div className="py-1">
+                <MenuItem>
+                  <a
+                    onClick={() => {
+                      setSortTitle(true);
+                      setSortDate(false);
+                    }}
+                    href="#"
+                    className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  >
+                    Title
+                  </a>
+                </MenuItem>
+                <MenuItem>
+                  <a
+                    onClick={() => {
+                      setSortTitle(false);
+                      setSortDate(true);
+                    }}
+                    href="#"
+                    className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  >
+                    Date Played
+                  </a>
+                </MenuItem>
+              </div>
+              </MenuItems>
+            </Menu>
+
           </div>
         </div>
 
@@ -135,7 +202,7 @@ export default function CollectionPage() {
           </div>
         )}
 
-        {/* Games Grid - Compact Cards */}
+        {/* Games Grid */}
         {!loading && !error && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {games.map((game) => (

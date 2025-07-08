@@ -110,7 +110,6 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        // Show success feedback (you can add a toast notification here)
         console.log('Game added successfully:', data.message);
         // Close the date modal and reset
         setShowDateModal(false);
@@ -119,7 +118,6 @@ export default function Home() {
         // Optionally remove the game from search results or mark it as added
       } else {
         console.error('Failed to add game:', data.error);
-        // Show error feedback
       }
     } catch (error) {
       console.error('Error adding game:', error);
@@ -151,7 +149,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold mb-8">Bello</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="cursor-pointer bg-green-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-600 transition-colors"
+          className="cursor-pointer bg-green-500 hover:bg-green-400 text-white font-bold text-xl py-4 px-8 border-b-4 border-green-700 hover:border-green-500 rounded transition-colors w-fit"
         >
           Get started
         </button>
@@ -284,18 +282,18 @@ export default function Home() {
               <p className="mb-6 text-black">Please sign in to join Poobies site.</p>
               <button
                 onClick={() => signIn('google')}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
+                className="cursor-pointer px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
               >
                 Sign In with Google
               </button>
               <button
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
+                className="cursor-pointer px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
               >
                 Create Account
               </button>
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition w-full"
+                className="cursor-pointer px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition w-full"
               >
                 Cancel
               </button>
