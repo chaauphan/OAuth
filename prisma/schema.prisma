@@ -14,12 +14,13 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(dbgenerated("concat('usr_', replace(cast(gen_random_uuid() as text), '-', ''))"))
-  email     String @unique
-  name      String?
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String @id @default(dbgenerated("concat('usr_', replace(cast(gen_random_uuid() as text), '-', ''))"))
+  email       String @unique
+  name        String?
+  displayName String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
   // Store games as JSON for now
   games Json? @default("[]")

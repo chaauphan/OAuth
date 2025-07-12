@@ -103,25 +103,29 @@ export default function CollectionPage() {
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                My Games
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                {games.length} game{games.length !== 1 ? 's' : ''} played
-              </p>
+          <div className="flex flex-col space-y-4">
+            <div className="flex justify-start">
+              <Link 
+                href="/"
+                className="bg-rose-400 hover:bg-rose-500 text-white font-bold py-2 px-4 border-b-4 border-rose-500 hover:border-rose-500 rounded transition-colors"
+              >
+                Log More Games
+              </Link>
             </div>
-            <Link 
-              href="/"
-              className="absolute bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded mb-4 top-35 left-40"
-            >
-              Log More Games
-            </Link>
+            
+            {/* Sort */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  My Games
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  {games.length} game{games.length !== 1 ? 's' : ''} played
+                </p>
+              </div>
 
-            <Menu as="div" className="relative inline-block text-left">
+              <Menu as="div" className="relative inline-block text-left">
               <div>
               <MenuButton className="inline-flex bg-white w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset">
                 Sort by:
@@ -160,9 +164,9 @@ export default function CollectionPage() {
               </div>
               </MenuItems>
             </Menu>
-
           </div>
         </div>
+      </div>
 
         {/* Loading State */}
         {loading && (
@@ -243,17 +247,16 @@ export default function CollectionPage() {
         {/* Empty State */}
         {!loading && !error && games.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎮</div>
+            <div className="text-6xl mb-4">(´•︵•`)</div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Your collection is empty
+              Uh oh spaghettio, your collection is empty!
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Add some games!
             </p>
             <Link 
               href="/"
-              className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors"
-            >
+              className="bg-rose-400 hover:bg-rose-500 text-white font-bold py-2 px-4 rounded-full">
               Add Your First Game
             </Link>
           </div>

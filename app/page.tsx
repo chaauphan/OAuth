@@ -3,6 +3,7 @@
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import { DisplayNameSetup } from "../components/display-name-setup";
 
 interface Game {
   game_id: number;
@@ -17,6 +18,7 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [mounted, setMounted] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [games, setGames] = useState<Game[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -29,6 +31,13 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Check if need to set display name
+  useEffect(() => {
+    if (session?.user && !session.user.displayName) {
+      setShowDisplayNameModal(true);
+    }
+  }, [session]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -115,7 +124,6 @@ export default function Home() {
         setShowDateModal(false);
         setSelectedGame(null);
         setPlayedDate("");
-        // Optionally remove the game from search results or mark it as added
       } else {
         console.error('Failed to add game:', data.error);
       }
@@ -143,13 +151,14 @@ export default function Home() {
     );
   }
 
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-green relative">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-8">Bello</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="cursor-pointer bg-green-500 hover:bg-green-400 text-white font-bold text-xl py-4 px-8 border-b-4 border-green-700 hover:border-green-500 rounded transition-colors w-fit"
+          className="cursor-pointer bg-green-500 hover:bg-green-400 text-white font-bold text-xl py-4 px-8 border-b-4 border-green-700 hover:border-green-500 rounded-full transition-colors w-fit"
         >
           Get started
         </button>
@@ -167,6 +176,7 @@ export default function Home() {
           MobyGames
         </a>
       </div>
+      {/* Search Modal */}
       {showModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
           {status === "loading" ? (
@@ -378,6 +388,30 @@ export default function Home() {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Display Name Modal */}
+      {showDisplayNameModal && session?.user && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Hi!
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Please set your display name to continue
+              </p>
+            </div>
+            
+            <DisplayNameSetup 
+              onDisplayNameSet={(displayName) => {
+                setShowDisplayNameModal(false);
+                window.location.reload();
+              }}
+              showEditButton={false}
+            />
           </div>
         </div>
       )}

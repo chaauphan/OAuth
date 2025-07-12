@@ -1,5 +1,6 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { prisma } from "./prisma";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -15,6 +16,18 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.sub!;
+        
+        // Fetch user's display name from database
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: session.user.email! },
+            select: { displayName: true }
+          });
+          session.user.displayName = user?.displayName || null;
+        } catch (error) {
+          console.error('Error fetching display name for session:', error);
+          session.user.displayName = null;
+        }
       }
       return session;
     },

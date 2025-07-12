@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         data: {
           email: session.user.email,
           name: session.user.name || null,
+          displayName: null,
           avatar: session.user.image || null
         }
       });
