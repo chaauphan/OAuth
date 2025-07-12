@@ -34,7 +34,7 @@ export function SessionHeader() {
                 <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
                   (and friends)
                 </span>
-                <span className="text-2xl font-bold text-black dark:text-white">'s Game Log </span>
+                <span className="text-2xl font-bold text-black dark:text-white">&apos;s Game Log </span>
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Signed in as: <strong className="text-gray-900 dark:text-white">{session.user?.email}</strong>
@@ -90,7 +90,7 @@ export function SessionHeader() {
             </div>
             
             <DisplayNameSetup 
-              onDisplayNameSet={(displayName) => {
+              onDisplayNameSet={() => {
                 setShowDisplayNameModal(false);
                 window.location.reload();
               }}

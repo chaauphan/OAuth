@@ -32,7 +32,7 @@ export default function TestDisplayNamePage() {
     );
   }
 
-  const handleDisplayNameSet = (displayName: string) => {
+  const handleDisplayNameSet = () => {
     setDisplayNameSet(true);
   };
 
@@ -44,7 +44,7 @@ export default function TestDisplayNamePage() {
             Welcome to Bello!
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Let's set up your display name
+            Let&apos;s set up your display name
           </p>
         </div>
 

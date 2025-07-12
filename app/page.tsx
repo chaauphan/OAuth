@@ -406,7 +406,7 @@ export default function Home() {
             </div>
             
             <DisplayNameSetup 
-              onDisplayNameSet={(displayName) => {
+              onDisplayNameSet={() => {
                 setShowDisplayNameModal(false);
                 window.location.reload();
               }}
