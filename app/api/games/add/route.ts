@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Received game data:', body);
     
-    const { gameId, title, platform, releaseDate, imageUrl, playedAt } = body;
+    const { gameId, title, platform, releaseDate, imageUrl, playedAt, rating } = body;
 
     if (!gameId || !title) {
       console.log('Missing data - gameId:', gameId, 'title:', title);
@@ -78,7 +78,8 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         gameId: game.id,
-        playedAt: playedAt ? new Date(playedAt) : null
+        playedAt: playedAt ? new Date(playedAt) : null,
+        rating: rating && rating > 0 ? rating : null
       },
       include: {
         game: true

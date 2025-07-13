@@ -1,142 +1,95 @@
 'use client';
 
-import { useSession, signIn } from "next-auth/react";
-import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { DisplayNameSetup } from "../components/display-name-setup";
+import StarRating from "../components/star-rating";
 
-interface Game {
-  game_id: number;
+interface CommunityGame {
+  id: number;
+  mobyGamesId: number;
   title: string;
   platform: string;
-  release_date?: string;
-  image_url?: string;
+  releaseDate?: string;
+  imageUrl?: string;
+  addedAt: string;
   playedAt?: string;
+  rating?: number;
+  user: {
+    displayName: string;
+    email: string;
+  };
+}
+
+interface Stats {
+  totalGames: number;
+  uniqueUsers: number;
+  averageGamesPerUser: number;
 }
 
 export default function Home() {
   const { data: session, status } = useSession();
   const [mounted, setMounted] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [games, setGames] = useState<Game[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState("");
-  const [addingGame, setAddingGame] = useState<number | null>(null);
-  const [playedDate, setPlayedDate] = useState("");
-  const [showDateModal, setShowDateModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  
+  // Feed state
+  const [communityGames, setCommunityGames] = useState<CommunityGame[]>([]);
+  const [communityLoading, setCommunityLoading] = useState(true);
+  const [communityError, setCommunityError] = useState("");
+  const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    fetchCommunityFeed();
   }, []);
 
   // Check if need to set display name
   useEffect(() => {
-    if (session?.user && !session.user.displayName) {
-      setShowDisplayNameModal(true);
-    }
+    const checkDisplayName = async () => {
+      if (session?.user) {
+        try {
+          const response = await fetch('/api/user/display-name');
+          if (response.ok) {
+            const data = await response.json();
+            if (!data.displayName) {
+              setShowDisplayNameModal(true);
+            } else {
+              setShowDisplayNameModal(false);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking display name:', error);
+          // Fallback to session check if API fails
+          if (session?.user && !session.user.displayName) {
+            setShowDisplayNameModal(true);
+          }
+        }
+      }
+    };
+
+    // Add a small delay to prevent too many concurrent requests
+    const timeoutId = setTimeout(checkDisplayName, 100);
+    return () => clearTimeout(timeoutId);
   }, [session]);
 
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return (query: string) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          if (query.trim().length >= 2) {
-            searchGames(query);
-          } else {
-            setGames([]);
-            setSearchError("");
-          }
-        }, 300); // 300ms delay
-      };
-    })(),
-    []
-  );
-
-  // Update search when query changes
-  useEffect(() => {
-    debouncedSearch(searchQuery);
-  }, [searchQuery, debouncedSearch]);
-
-  const searchGames = async (query: string) => {
-    if (!query.trim() || query.trim().length < 2) return;
-
-    setIsSearching(true);
-    setSearchError("");
-
+  // Fetch feed
+  const fetchCommunityFeed = async () => {
     try {
-      const response = await fetch(`/api/games/search?q=${encodeURIComponent(query)}&limit=10`);
+      const response = await fetch('/api/games/all-users');
       const data = await response.json();
 
       if (response.ok) {
-        setGames(data.games || []);
+        setCommunityGames(data.games || []);
+        setStats(data.stats || null);
       } else {
-        setSearchError(data.error || 'Failed to search games');
-        setGames([]);
+        setCommunityError(data.error || 'Failed to load community feed');
       }
     } catch (error) {
-      console.error('Search error:', error);
-      setSearchError('Failed to search games');
-      setGames([]);
+      console.error('Error fetching community feed:', error);
+      setCommunityError('Failed to load community feed');
     } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleAddGameClick = (game: Game) => {
-    setSelectedGame(game);
-    setShowDateModal(true);
-  };
-
-  const addGameToCollection = async (game: Game, datePlayed: string) => {
-    setAddingGame(game.game_id);
-    
-    const gameData = {
-      gameId: game.game_id,
-      title: game.title,
-      platform: game.platform,
-      releaseDate: game.release_date,
-      imageUrl: game.image_url,
-      playedAt: datePlayed || null
-    };
-    
-    console.log('Sending game data:', gameData);
-    
-    try {
-      const response = await fetch('/api/games/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(gameData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('Game added successfully:', data.message);
-        // Close the date modal and reset
-        setShowDateModal(false);
-        setSelectedGame(null);
-        setPlayedDate("");
-      } else {
-        console.error('Failed to add game:', data.error);
-      }
-    } catch (error) {
-      console.error('Error adding game:', error);
-    } finally {
-      setAddingGame(null);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      searchGames(searchQuery);
+      setCommunityLoading(false);
     }
   };
 
@@ -144,28 +97,127 @@ export default function Home() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-8">Bello</h1>
           <p>Loading...</p>
         </div>
       </main>
     );
   }
 
-
   return (
-    <main className="min-h-screen flex items-center justify-center bg-green relative">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-8">Bello</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="cursor-pointer bg-green-500 hover:bg-green-400 text-white font-bold text-xl py-4 px-8 border-b-4 border-green-700 hover:border-green-500 rounded-full transition-colors w-fit"
-        >
-          Get started
-        </button>
+    <main className="min-h-screen bg-green">
+      {/* Feed Section */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Home
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            What have Chau and friends been up to?
+          </p>
+        </div>
+
+        {/* Stats */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 text-center shadow-sm">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalGames}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total Games</div>
+            </div>
+            <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 text-center shadow-sm">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.uniqueUsers}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Active Players</div>
+            </div>
+            <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 text-center shadow-sm">
+              <div className="text-2xl font-bold text-pink-400 dark:text-pink-400">{stats.averageGamesPerUser}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Avg Games/Player</div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading */}
+        {communityLoading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading community feed...</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {communityError && (
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">{communityError}</p>
+            <button 
+                onClick={() => window.location.reload()}
+                className="cursor-pointer bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded mb-4 top-10 left-10 transition-colors"
+              >
+                Refresh Page
+              </button>
+          </div>
+        )}
+
+        {/* Feed */}
+        {!communityLoading && !communityError && communityGames.length > 0 && (
+          <div className="space-y-6">
+            {communityGames.slice(0, 10).map((game) => (
+              <div 
+                key={`${game.id}-${game.user.email}`}
+                className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-200"
+              >
+                <div className="flex">
+                  {game.imageUrl && (
+                    <div className="flex-shrink-0">
+                      <Image
+                        src={game.imageUrl}
+                        alt={game.title}
+                        width={120}
+                        height={80}
+                        className="w-30 h-20 object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-0">
+                          {game.title}
+                        </h3>
+                        
+                        <div className="mb-0">
+                          <StarRating rating={game.rating || 0} size="sm" showValue={game.rating ? true : false} />
+                        </div>
+                        
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {game.user.displayName}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(game.addedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!communityLoading && !communityError && communityGames.length === 0 && (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              No games logged yet!
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Be the first to log a game!
+            </p>
+          </div>
+        )}
       </div>
-      
+
       {/* MobyGames Credit */}
-      <div className="absolute bottom-4 left-4 text-xs text-gray-600 dark:text-gray-400">
+      <div className="fixed bottom-4 left-4 text-xs text-gray-600 dark:text-gray-400 z-10">
         Game data provided by{' '}
         <a 
           href="https://www.mobygames.com" 
@@ -176,221 +228,6 @@ export default function Home() {
           MobyGames
         </a>
       </div>
-      {/* Search Modal */}
-      {showModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
-          {status === "loading" ? (
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
-              <p>Loading...</p>
-            </div>
-          ) : session ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl mx-4 h-96 flex flex-col">
-              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-black dark:text-white">Log a game...</h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="cursor-pointer text-gray-500 dark:text-white hover:text-gray-700 text-xl"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="flex-1 flex flex-col p-6 overflow-hidden">
-                <div className="mb-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search for game..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-black dark:text-white"
-                    />
-                    {isSearching && (
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-
-                
-                <div className="flex-1 overflow-y-auto">
-                  {searchError && (
-                    <p className="text-red-500 text-center mb-4">{searchError}</p>
-                  )}
-                  
-                  {isSearching && (
-                    <div className="text-center py-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                      <p className="text-gray-500 dark:text-gray-400">Searching...</p>
-                    </div>
-                  )}
-                  
-                  {!isSearching && games.length > 0 && (
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold text-black dark:text-white mb-3">
-                        Found {games.length} games:
-                      </h3>
-                      {games.map((game) => (
-                        <div
-                          key={game.game_id}
-                          className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                        >
-                          {game.image_url && (
-                            <Image
-                              src={game.image_url}
-                              alt={game.title}
-                              width={64}
-                              height={64}
-                              className="w-16 h-16 object-cover rounded"
-                            />
-                          )}
-                          <div className="flex-1 text-left">
-                            <h4 className="font-semibold text-black dark:text-white">{game.title}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {game.platform} {game.release_date && `• ${game.release_date}`}
-                            </p>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddGameClick(game);
-                            }}
-                            disabled={addingGame === game.game_id}
-                            className="flex items-center justify-center w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors duration-200 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Add to collection"
-                          >
-                            {addingGame === game.game_id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            ) : (
-                              <span className="text-lg font-bold">+</span>
-                            )}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {!isSearching && games.length === 0 && searchQuery.length >= 2 && !searchError && (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                      No games found. Try a different search term.
-                    </p>
-                  )}
-                  
-                  {searchQuery.length < 2 && searchQuery.length > 0 && (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                      Type at least 2 characters to search...
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
-              <h2 className="text-2xl font-bold mb-4 text-black">Sign In Required</h2>
-              <p className="mb-6 text-black">Please sign in to join Poobies site.</p>
-              <button
-                onClick={() => signIn('google')}
-                className="cursor-pointer px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
-              >
-                Sign In with Google
-              </button>
-              <button
-                className="cursor-pointer px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4 w-full"
-              >
-                Create Account
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="cursor-pointer px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition w-full"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Date Selection Modal */}
-      {showDateModal && selectedGame && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-black dark:text-white">
-                Date played?
-              </h3>
-              <button
-                onClick={() => {
-                  setShowDateModal(false);
-                  setSelectedGame(null);
-                  setPlayedDate("");
-                }}
-                className="cursor-pointer text-gray-500 dark:text-white hover:text-gray-700 text-xl"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
-                {selectedGame.image_url && (
-                  <Image
-                    src={selectedGame.image_url}
-                    alt={selectedGame.title}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h4 className="font-semibold text-black dark:text-white">{selectedGame.title}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {selectedGame.platform} {selectedGame.release_date && `• ${selectedGame.release_date}`}
-                  </p>
-                </div>
-              </div>
-              
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Date played (optional)
-              </label>
-              <input
-                type="date"
-                value={playedDate}
-                onChange={(e) => setPlayedDate(e.target.value)}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-black dark:text-white"
-              />
-            </div>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  setShowDateModal(false);
-                  setSelectedGame(null);
-                  setPlayedDate("");
-                }}
-                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => addGameToCollection(selectedGame, playedDate)}
-                disabled={addingGame === selectedGame.game_id}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {addingGame === selectedGame.game_id ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Adding...
-                  </div>
-                ) : (
-                  'Add to Collection'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Display Name Modal */}
       {showDisplayNameModal && session?.user && (
@@ -408,7 +245,6 @@ export default function Home() {
             <DisplayNameSetup 
               onDisplayNameSet={() => {
                 setShowDisplayNameModal(false);
-                window.location.reload();
               }}
               showEditButton={false}
             />

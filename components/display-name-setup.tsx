@@ -9,7 +9,7 @@ interface DisplayNameSetupProps {
 }
 
 export function DisplayNameSetup({ onDisplayNameSet, showEditButton = false }: DisplayNameSetupProps) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [displayName, setDisplayName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +29,7 @@ export function DisplayNameSetup({ onDisplayNameSet, showEditButton = false }: D
         const data = await response.json();
         setCurrentDisplayName(data.displayName || '');
         if (data.displayName && !showEditButton) {
-          // If user already has a display name and we're not in edit mode, call the callback
+          // If user already has display name and not in edit mode, call callback
           onDisplayNameSet?.(data.displayName);
         }
       }
@@ -64,6 +64,8 @@ export function DisplayNameSetup({ onDisplayNameSet, showEditButton = false }: D
         setCurrentDisplayName(data.displayName);
         setIsEditing(false);
         setDisplayName('');
+        // Update the session to include the new display name
+        await update();
         onDisplayNameSet?.(data.displayName);
       } else {
         setError(data.error || 'Failed to update display name');
@@ -92,7 +94,7 @@ export function DisplayNameSetup({ onDisplayNameSet, showEditButton = false }: D
     return null;
   }
 
-  // If user has a display name and we're not in edit mode, show it with edit button
+  // If user has a display name and  not in edit mode, show edit button
   if (currentDisplayName && !isEditing && showEditButton) {
     return (
       <div className="flex items-center space-x-3">

@@ -16,7 +16,7 @@ export function SessionHeader() {
 
   return (
     <>
-      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-zinc-700">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-4">
             <div className="flex flex-col">
@@ -61,6 +61,13 @@ export function SessionHeader() {
             Games Played
           </Link>
 
+          { /* <Link 
+            href="/community"
+            className="bg-green-500 hover:bg-green-400 text-white text-sm font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded transition-colors w-fit"
+            >
+            Community Feed
+          </Link> 
+
           {!session.user?.displayName && (
             <button
               onClick={() => setShowDisplayNameModal(true)}
@@ -68,7 +75,7 @@ export function SessionHeader() {
             >
               Set Display Name
             </button>
-          )}
+          )}*/}
         </div>
         </div>
       </div>

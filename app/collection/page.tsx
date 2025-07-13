@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { sortGamesByDatePlayed, sortGamesByTitle } from "../../lib/sort";
+import StarRating from "../../components/star-rating";
 
 interface Game {
   id: number;
@@ -17,6 +18,7 @@ interface Game {
   imageUrl?: string;
   addedAt: string;
   playedAt?: string;
+  rating?: number;
 }
 
 export default function CollectionPage() {
@@ -234,6 +236,11 @@ export default function CollectionPage() {
                     <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
                       Played: {new Date(game.playedAt).toLocaleDateString()}
                     </p>
+                  )}
+                  {game.rating && (
+                    <div className="mb-1">
+                      <StarRating rating={game.rating} size="sm" />
+                    </div>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Added: {new Date(game.addedAt).toLocaleDateString()}

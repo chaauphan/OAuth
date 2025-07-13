@@ -9,6 +9,7 @@ interface UserGameWithGame {
   gameId: number;
   addedAt: Date;
   playedAt: Date | null;
+  rating: number | null;
   game: {
     id: number;
     mobyGamesId: number;
@@ -57,7 +58,8 @@ export async function GET() {
       releaseDate: userGame.game.releaseDate,
       imageUrl: userGame.game.imageUrl,
       addedAt: userGame.addedAt.toISOString(),
-      playedAt: userGame.playedAt?.toISOString() || null
+      playedAt: userGame.playedAt?.toISOString() || null,
+      rating: userGame.rating
     }));
 
     console.log('Successfully fetched collection for user:', session.user.email, 'Games found:', games.length);

@@ -49,6 +49,7 @@ model UserGame {
   gameId    Int
   addedAt   DateTime @default(now())
   playedAt  DateTime? // When the game was actually played
+  rating    Int?     // User's rating (1-5 stars)
   
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

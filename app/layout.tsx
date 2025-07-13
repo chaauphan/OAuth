@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SessionHeader } from "@/components/session-header";
+import { GetStartedButton } from "@/components/get-started-button";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,12 +29,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} antialiased`}
     >
       <head />
-      <body className="bg-white text-black dark:bg-gray-800 dark:text-white">
+      <body className="bg-white text-black dark:bg-zinc-900 dark:text-white">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Providers>
             <div className="flex flex-col min-h-screen">
               <SessionHeader />
-              <div className="flex justify-end p-4">
+              <div className="flex justify-end items-center p-4 space-x-4">
+                <GetStartedButton />
                 <ModeToggle />
               </div>
               
