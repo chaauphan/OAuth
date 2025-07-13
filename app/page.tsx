@@ -29,7 +29,7 @@ interface Stats {
 }
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
   

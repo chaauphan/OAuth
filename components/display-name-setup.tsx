@@ -20,7 +20,7 @@ export function DisplayNameSetup({ onDisplayNameSet, showEditButton = false }: D
     if (session?.user) {
       fetchCurrentDisplayName();
     }
-  }, [session]);
+  }, [session, onDisplayNameSet, showEditButton]);
 
   const fetchCurrentDisplayName = async () => {
     try {

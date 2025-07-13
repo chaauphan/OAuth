@@ -2,18 +2,28 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import Image from "next/image";
+
+interface Game {
+  game_id: number;
+  title: string;
+  platform: string;
+  release_date?: string;
+  image_url?: string;
+  playedAt?: string;
+}
 
 export function GetStartedButton() {
   const { data: session, status } = useSession();
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [games, setGames] = useState<any[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [addingGame, setAddingGame] = useState<number | null>(null);
   const [playedDate, setPlayedDate] = useState("");
   const [showDateModal, setShowDateModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<any | null>(null);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [gameRating, setGameRating] = useState(0);
 
   const searchGames = async (query: string) => {
@@ -41,13 +51,13 @@ export function GetStartedButton() {
     }
   };
 
-  const handleAddGameClick = (game: any) => {
+  const handleAddGameClick = (game: Game) => {
     setSelectedGame(game);
     setShowDateModal(true);
     setGameRating(0);
   };
 
-  const addGameToCollection = async (game: any, datePlayed: string, rating: number) => {
+  const addGameToCollection = async (game: Game, datePlayed: string, rating: number) => {
     const validRating = typeof rating === 'number' && rating >= 0 && rating <= 5 ? rating : 0;
     setAddingGame(game.game_id);
     
@@ -175,9 +185,11 @@ export function GetStartedButton() {
                           className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         >
                           {game.image_url && (
-                            <img
+                            <Image
                               src={game.image_url}
                               alt={game.title}
+                              width={64}
+                              height={64}
                               className="w-16 h-16 object-cover rounded"
                             />
                           )}
@@ -266,9 +278,11 @@ export function GetStartedButton() {
             <div className="mb-6">
               <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
                 {selectedGame.image_url && (
-                  <img
+                  <Image
                     src={selectedGame.image_url}
                     alt={selectedGame.title}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover rounded"
                   />
                 )}

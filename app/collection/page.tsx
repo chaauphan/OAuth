@@ -2,7 +2,7 @@
 
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
@@ -29,25 +29,7 @@ export default function CollectionPage() {
   const [sortTitle, setSortTitle] = useState(false);
   const [sortDate, setSortDate] = useState(false);
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchUserGames();
-    }
-  }, [session]);
-
-  useEffect(() => {
-    if (sortTitle) {
-      fetchUserGames();
-    }
-  }, [sortTitle]);
-
-  useEffect(() => {
-    if (sortDate) {
-      fetchUserGames();
-    }
-  }, [sortDate]);
-
-  const fetchUserGames = async () => {
+  const fetchUserGames = useCallback(async () => {
     try {
       const response = await fetch('/api/games/collection');
       const data = await response.json();
@@ -72,7 +54,25 @@ export default function CollectionPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortTitle, sortDate]);
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchUserGames();
+    }
+  }, [session, fetchUserGames]);
+
+  useEffect(() => {
+    if (sortTitle) {
+      fetchUserGames();
+    }
+  }, [sortTitle, fetchUserGames]);
+
+  useEffect(() => {
+    if (sortDate) {
+      fetchUserGames();
+    }
+  }, [sortDate, fetchUserGames]);
 
   if (status === "loading") {
     return (
