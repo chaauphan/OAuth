@@ -146,6 +146,15 @@ export default function Home() {
         {communityError && (
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{communityError}</p>
+            <div className="flex justify-center mb-6">
+              <Image 
+                src="/reallySadCat.gif" 
+                alt="Sad cat" 
+                width={128}
+                height={128}
+                className="w-32 h-32 rounded-lg"
+              />
+            </div>
             <button 
                 onClick={() => window.location.reload()}
                 className="cursor-pointer bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 border-b-4 border-red-700 hover:border-red-500 rounded mb-4 top-10 left-10 transition-colors"

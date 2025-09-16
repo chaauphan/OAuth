@@ -24,3 +24,15 @@ CREATE TABLE IF NOT EXISTS "UserGame" (
 
 -- Add playedAt column to existing UserGame table if it doesn't exist
 ALTER TABLE "UserGame" ADD COLUMN IF NOT EXISTS "playedAt" TIMESTAMP; 
+ALTER TABLE "UserGame" ADD COLUMN IF NOT EXISTS "rating" INT4;
+
+CREATE TABLE IF NOT EXISTS "SearchCache" (
+  id SERIAL PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,
+  data JSONB NOT NULL,
+  "expiresAt" TIMESTAMP NOT NULL,
+  "createdAt" TIMESTAMP DEFAULT NOW(),
+  "updatedAt" TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS "SearchCache_expiresAt_idx" ON "SearchCache"("expiresAt");
