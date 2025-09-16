@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 const MOBYGAMES_API_KEY = process.env.MOBYGAMES_API_KEY;
 const MOBYGAMES_BASE_URL = 'https://api.mobygames.com/v1';
@@ -69,11 +70,11 @@ async function setCachedData(cacheKey: string, data: searchResponse, ttlSeconds:
       where: { key: cacheKey },
       create: {
         key: cacheKey,
-        data: data as any, 
+        data: data as Prisma.InputJsonValue,
         expiresAt,
       },
       update: {
-        data: data as any,
+        data: data as Prisma.InputJsonValue,
         expiresAt,
       },
     });
