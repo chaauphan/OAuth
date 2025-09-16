@@ -25,6 +25,8 @@ export function GetStartedButton() {
   const [showDateModal, setShowDateModal] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [gameRating, setGameRating] = useState(0);
+  const [hasSearched, setHasSearched] = useState(false);
+
 
   const searchGames = async (query: string) => {
     if (!query.trim() || query.trim().length < 2) return;
@@ -108,6 +110,14 @@ export function GetStartedButton() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchGames(searchQuery);
+      setHasSearched(true);
+    }
+  };
+
   return (
     <>
       <button
@@ -125,9 +135,9 @@ export function GetStartedButton() {
               <p>Loading...</p>
             </div>
           ) : session ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl mx-4 h-96 flex flex-col">
-              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-black dark:text-white">Log a game...</h2>
+            <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg w-full max-w-4xl mx-4 h-150 flex flex-col">
+              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-zinc-700">
+                <h2 className="text-2xl font-bold text-black dark:text-[#fffffc]">Log a game...</h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="cursor-pointer text-gray-500 dark:text-white hover:text-gray-700 text-xl"
@@ -144,15 +154,17 @@ export function GetStartedButton() {
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
-                        if (e.target.value.trim().length >= 2) {
-                          searchGames(e.target.value);
-                        } else {
+                        if (e.target.value.trim().length < 2) {
                           setGames([]);
                           setSearchError("");
-                        }
+                          setHasSearched(false);
+                        } 
+                          
+                        
                       }}
+                      onKeyDown={handleKeyDown} 
                       onKeyPress={handleKeyPress}
-                      className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-black dark:text-white"
+                      className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-700 text-black dark:text-[#fffffc]"
                     />
                     {isSearching && (
                       <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
@@ -219,7 +231,7 @@ export function GetStartedButton() {
                     </div>
                   )}
                   
-                  {!isSearching && games.length === 0 && searchQuery.length >= 2 && !searchError && (
+                  {!isSearching && games.length === 0 && hasSearched && !searchError && (
                     <p className="text-center text-gray-500 dark:text-gray-400 py-4">
                       No games found. Try a different search term.
                     </p>
@@ -257,10 +269,10 @@ export function GetStartedButton() {
       {/* Date Selection Modal */}
       {showDateModal && selectedGame && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-black dark:text-white">
-                Date played?
+                Add Game
               </h3>
               <button
                 onClick={() => {
@@ -276,7 +288,7 @@ export function GetStartedButton() {
             </div>
             
             <div className="mb-6">
-              <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
+              <div className="flex items-center space-x-4 p-3 border border-gray-200 dark:border-zinc-600 rounded-lg mb-4">
                 {selectedGame.image_url && (
                   <Image
                     src={selectedGame.image_url}
@@ -301,7 +313,7 @@ export function GetStartedButton() {
                 type="date"
                 value={playedDate}
                 onChange={(e) => setPlayedDate(e.target.value)}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-black dark:text-white"
+                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-zinc-700 text-black dark:text-white"
               />
               
               <div className="mt-4">
@@ -337,14 +349,14 @@ export function GetStartedButton() {
                   setPlayedDate("");
                   setGameRating(0);
                 }}
-                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                className="cursor-pointer flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => addGameToCollection(selectedGame, playedDate, gameRating)}
                 disabled={addingGame === selectedGame.game_id}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {addingGame === selectedGame.game_id ? (
                   <div className="flex items-center justify-center">

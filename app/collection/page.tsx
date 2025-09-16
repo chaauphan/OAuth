@@ -129,7 +129,7 @@ export default function CollectionPage() {
 
               <Menu as="div" className="relative inline-block text-left">
               <div>
-              <MenuButton className="inline-flex bg-white w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset">
+              <MenuButton className="inline-flex bg-[#fffffc] w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset">
                 Sort by:
               </MenuButton>
               </div>

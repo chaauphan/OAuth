@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,46 +8,49 @@ datasource db {
 }
 
 model User {
-  id          String @id @default(dbgenerated("concat('usr_', replace(cast(gen_random_uuid() as text), '-', ''))"))
-  email       String @unique
+  id          String     @id @default(dbgenerated("concat('usr_', replace((gen_random_uuid())::text, '-'::text, ''::text))"))
+  email       String     @unique
   name        String?
-  displayName String?
   avatar      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Store games as JSON for now
-  games Json? @default("[]")
-  
-  // Relations
-  userGames UserGame[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  games       Json?      @default("[]")
+  displayName String?
+  userGames   UserGame[]
 }
 
 model Game {
-  id          Int      @id @default(autoincrement())
-  mobyGamesId Int      @unique // MobyGames game_id
+  id          Int        @id @default(autoincrement())
+  mobyGamesId Int        @unique
   title       String
   platform    String
   releaseDate String?
   imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  userGames UserGame[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userGames   UserGame[]
 }
 
 model UserGame {
+  id       Int       @id @default(autoincrement())
+  userId   String
+  gameId   Int
+  addedAt  DateTime  @default(now())
+  playedAt DateTime? @db.Timestamp(6)
+  rating   Int?
+  game     Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+}
+
+model SearchCache {
   id        Int      @id @default(autoincrement())
-  userId    String
-  gameId    Int
-  addedAt   DateTime @default(now())
-  playedAt  DateTime? // When the game was actually played
-  rating    Int?     // User's rating (1-5 stars)
-  
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, gameId]) // Prevent duplicate entries
-} 
+  key       String   @unique
+  data      Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+}
